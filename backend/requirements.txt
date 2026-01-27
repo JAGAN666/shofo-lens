@@ -1,19 +1,17 @@
 # Core
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-pydantic==2.5.3
-pydantic-settings==2.1.0
-python-multipart==0.0.6
+fastapi>=0.109.0
+uvicorn>=0.27.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
 
-# ML & Data (lightweight for cloud demo)
-numpy==1.26.3
-pandas==2.1.4
-scikit-learn==1.4.0
+# Data (lightweight)
+numpy>=1.24.0
+pandas>=2.0.0
 
 # Vector Database
-qdrant-client==1.7.0
+qdrant-client>=1.7.0
 
 # Utilities
-httpx==0.26.0
-python-dotenv==1.0.0
-loguru==0.7.2
+httpx>=0.25.0
+python-dotenv>=1.0.0
+loguru>=0.7.0

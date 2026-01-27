@@ -12,16 +12,22 @@ import numpy as np
 import pandas as pd
 from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-import joblib
 from pathlib import Path
 from loguru import logger
 from datetime import datetime
 import json
 import random
 
-# Optional heavy dependencies
+# Optional dependencies
+try:
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler
+    import joblib
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+    logger.warning("sklearn not available, using demo mode")
+
 try:
     import xgboost as xgb
     XGBOOST_AVAILABLE = True
