@@ -5,17 +5,10 @@ pydantic==2.5.3
 pydantic-settings==2.1.0
 python-multipart==0.0.6
 
-# ML & Data (CPU-only, optimized for cloud)
---extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.1.2+cpu
-transformers==4.36.2
-sentence-transformers==2.2.2
-datasets==2.16.1
+# ML & Data (lightweight for cloud demo)
 numpy==1.26.3
 pandas==2.1.4
 scikit-learn==1.4.0
-xgboost==2.0.3
-scipy==1.11.4
 
 # Vector Database
 qdrant-client==1.7.0
@@ -24,4 +17,3 @@ qdrant-client==1.7.0
 httpx==0.26.0
 python-dotenv==1.0.0
 loguru==0.7.2
-tqdm==4.66.1

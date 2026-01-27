@@ -5,22 +5,36 @@ Features:
 - Multi-target prediction (views, likes, shares, comments)
 - Confidence intervals using quantile regression
 - Viral potential score combining all factors
-- Visual explainability with SHAP
+- Visual explainability with SHAP (when available)
 """
 
 import numpy as np
 import pandas as pd
 from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
-import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-import shap
 import joblib
 from pathlib import Path
 from loguru import logger
 from datetime import datetime
 import json
+import random
+
+# Optional heavy dependencies
+try:
+    import xgboost as xgb
+    XGBOOST_AVAILABLE = True
+except ImportError:
+    XGBOOST_AVAILABLE = False
+    logger.warning("xgboost not available, using demo mode")
+
+try:
+    import shap
+    SHAP_AVAILABLE = True
+except ImportError:
+    SHAP_AVAILABLE = False
+    logger.warning("shap not available, using simple feature importance")
 
 
 @dataclass

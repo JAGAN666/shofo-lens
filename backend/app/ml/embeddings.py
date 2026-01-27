@@ -1,10 +1,18 @@
-import torch
-from sentence_transformers import SentenceTransformer
 from typing import List, Optional
 import numpy as np
 from loguru import logger
+import hashlib
 
 from app.core.config import settings
+
+# Try to import sentence-transformers, fall back to demo mode
+try:
+    import torch
+    from sentence_transformers import SentenceTransformer
+    SENTENCE_TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    SENTENCE_TRANSFORMERS_AVAILABLE = False
+    logger.warning("sentence-transformers not available, using demo mode")
 
 
 class EmbeddingService:
@@ -12,11 +20,21 @@ class EmbeddingService:
 
     def __init__(self, model_name: Optional[str] = None):
         self.model_name = model_name or settings.EMBEDDING_MODEL
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        logger.info(f"Loading embedding model {self.model_name} on {self.device}")
-        self.model = SentenceTransformer(self.model_name, device=self.device)
-        self.dimension = self.model.get_sentence_embedding_dimension()
-        logger.info(f"Embedding dimension: {self.dimension}")
+        self.dimension = settings.EMBEDDING_DIMENSION
+        self.model = None
+
+        if SENTENCE_TRANSFORMERS_AVAILABLE:
+            try:
+                self.device = "cuda" if torch.cuda.is_available() else "cpu"
+                logger.info(f"Loading embedding model {self.model_name} on {self.device}")
+                self.model = SentenceTransformer(self.model_name, device=self.device)
+                self.dimension = self.model.get_sentence_embedding_dimension()
+                logger.info(f"Embedding dimension: {self.dimension}")
+            except Exception as e:
+                logger.warning(f"Could not load model: {e}, using demo mode")
+                self.model = None
+        else:
+            logger.info(f"Running in demo mode with dimension {self.dimension}")
 
     def encode(self, texts: List[str], batch_size: int = 32) -> np.ndarray:
         """Encode a list of texts into embeddings."""
@@ -26,14 +44,32 @@ class EmbeddingService:
         # Handle None or empty strings
         processed_texts = [t if t else "" for t in texts]
 
-        embeddings = self.model.encode(
-            processed_texts,
-            batch_size=batch_size,
-            show_progress_bar=len(texts) > 100,
-            convert_to_numpy=True,
-            normalize_embeddings=True,
-        )
-        return embeddings
+        if self.model is not None:
+            embeddings = self.model.encode(
+                processed_texts,
+                batch_size=batch_size,
+                show_progress_bar=len(texts) > 100,
+                convert_to_numpy=True,
+                normalize_embeddings=True,
+            )
+            return embeddings
+        else:
+            # Demo mode: generate deterministic embeddings from text hash
+            return np.array([self._demo_embed(t) for t in processed_texts])
+
+    def _demo_embed(self, text: str) -> np.ndarray:
+        """Generate a deterministic embedding from text for demo purposes."""
+        # Use hash to generate consistent embeddings for same text
+        hash_bytes = hashlib.sha256(text.encode()).digest()
+        # Extend hash to match dimension
+        extended = hash_bytes * (self.dimension // len(hash_bytes) + 1)
+        arr = np.frombuffer(extended[:self.dimension], dtype=np.uint8).astype(np.float32)
+        # Normalize to unit vector
+        arr = arr / 255.0 - 0.5
+        norm = np.linalg.norm(arr)
+        if norm > 0:
+            arr = arr / norm
+        return arr
 
     def encode_single(self, text: str) -> np.ndarray:
         """Encode a single text into an embedding."""

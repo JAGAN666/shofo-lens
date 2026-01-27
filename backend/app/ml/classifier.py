@@ -3,14 +3,22 @@ Zero-Shot Content Classifier
 
 Automatically labels videos into categories without any training data.
 Uses transformer models for multi-label classification.
+Falls back to keyword-based classification if transformers not available.
 """
 
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 import numpy as np
-from transformers import pipeline
 from loguru import logger
 import json
+
+# Try to import transformers, fall back to keyword-based classification
+try:
+    from transformers import pipeline
+    TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    TRANSFORMERS_AVAILABLE = False
+    logger.warning("transformers not available, using keyword-based classification")
 
 
 @dataclass
@@ -78,6 +86,13 @@ class ContentClassifier:
 
     def __init__(self, model_name: str = "facebook/bart-large-mnli"):
         """Initialize the classifier with a zero-shot model."""
+        self.classifier = None
+        self.is_loaded = False
+
+        if not TRANSFORMERS_AVAILABLE:
+            logger.info("Running classifier in demo mode (keyword-based)")
+            return
+
         logger.info(f"Loading zero-shot classifier: {model_name}")
         try:
             self.classifier = pipeline(
