@@ -17,11 +17,9 @@ xgboost==2.0.3
 shap==0.44.1
 
 # Advanced ML (Spectacular Features)
-bertopic==0.16.0
-hdbscan==0.8.33
-umap-learn==0.5.5
+# Note: bertopic/hdbscan removed due to compilation issues on cloud platforms
+# Using sklearn alternatives instead
 scipy==1.11.4
-lightgbm==4.2.0
 
 # Vector Database
 qdrant-client==1.7.0
