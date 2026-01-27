@@ -5,10 +5,13 @@ services:
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: QDRANT_HOST
-        sync: false
+        value: 4594413c-b3c6-4a73-b706-69f0a7b5c73a.us-east4-0.gcp.cloud.qdrant.io
       - key: QDRANT_API_KEY
-        sync: false
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.95JBAqrvCOLLLrYA7Fob1qSBOFnMbVos36FKBWd8buE
+      - key: USE_MEMORY_QDRANT
+        value: "false"
