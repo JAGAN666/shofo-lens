@@ -17,7 +17,9 @@ class Settings(BaseSettings):
     # Qdrant
     QDRANT_HOST: str = "localhost"
     QDRANT_PORT: int = 6333
+    QDRANT_API_KEY: str | None = None
     QDRANT_COLLECTION: str = "shofo_videos"
+    USE_MEMORY_QDRANT: bool = True  # Use in-memory Qdrant for demo
 
     # ML Models
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"

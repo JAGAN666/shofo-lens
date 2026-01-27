@@ -12,10 +12,22 @@ class SearchService:
     """Service for semantic search using Qdrant vector database."""
 
     def __init__(self):
-        self.client = QdrantClient(
-            host=settings.QDRANT_HOST,
-            port=settings.QDRANT_PORT,
-        )
+        # Use in-memory Qdrant for demo, or connect to Qdrant Cloud
+        if settings.USE_MEMORY_QDRANT:
+            logger.info("Using in-memory Qdrant for demo mode")
+            self.client = QdrantClient(":memory:")
+        elif settings.QDRANT_API_KEY:
+            logger.info(f"Connecting to Qdrant Cloud at {settings.QDRANT_HOST}")
+            self.client = QdrantClient(
+                url=f"https://{settings.QDRANT_HOST}",
+                api_key=settings.QDRANT_API_KEY,
+            )
+        else:
+            logger.info(f"Connecting to local Qdrant at {settings.QDRANT_HOST}:{settings.QDRANT_PORT}")
+            self.client = QdrantClient(
+                host=settings.QDRANT_HOST,
+                port=settings.QDRANT_PORT,
+            )
         self.collection_name = settings.QDRANT_COLLECTION
         self.dimension = settings.EMBEDDING_DIMENSION
         self._ensure_collection()
