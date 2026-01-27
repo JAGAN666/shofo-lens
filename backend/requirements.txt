@@ -1,0 +1,40 @@
+# Core
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+python-multipart==0.0.6
+
+# ML & Data
+torch==2.1.2
+transformers==4.36.2
+sentence-transformers==2.2.2
+datasets==2.16.1
+numpy==1.26.3
+pandas==2.1.4
+scikit-learn==1.4.0
+xgboost==2.0.3
+shap==0.44.1
+
+# Advanced ML (Spectacular Features)
+bertopic==0.16.0
+hdbscan==0.8.33
+umap-learn==0.5.5
+scipy==1.11.4
+lightgbm==4.2.0
+
+# Vector Database
+qdrant-client==1.7.0
+
+# Database
+asyncpg==0.29.0
+sqlalchemy[asyncio]==2.0.25
+
+# Caching
+redis==5.0.1
+
+# Utilities
+httpx==0.26.0
+python-dotenv==1.0.0
+loguru==0.7.2
+tqdm==4.66.1
