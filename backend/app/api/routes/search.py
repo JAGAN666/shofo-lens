@@ -31,6 +31,70 @@ class SearchResponse(BaseModel):
     total: int
 
 
+def _fallback_search(query_text: str, limit: int = 20) -> List[Dict[str, Any]]:
+    """Fallback keyword-based search when Qdrant has no data."""
+    from app.api.routes.videos import get_video_cache
+    import json
+
+    video_cache = get_video_cache()
+    if not video_cache:
+        return []
+
+    query_words = query_text.lower().split()
+    scored_videos = []
+
+    for video_id, video in video_cache.items():
+        score = 0.0
+
+        # Check description
+        description = (video.get("description") or "").lower()
+        for word in query_words:
+            if word in description:
+                score += 0.3
+
+        # Check transcript
+        transcript = (video.get("transcript") or "").lower()
+        for word in query_words:
+            if word in transcript:
+                score += 0.4
+
+        # Check hashtags
+        hashtags = video.get("hashtags", [])
+        if isinstance(hashtags, str):
+            try:
+                hashtags = json.loads(hashtags)
+            except:
+                hashtags = []
+        hashtags_text = " ".join(hashtags).lower()
+        for word in query_words:
+            if word in hashtags_text or f"#{word}" in hashtags_text:
+                score += 0.3
+
+        if score > 0:
+            engagement = video.get("engagement_metrics", {})
+            if isinstance(engagement, str):
+                try:
+                    engagement = json.loads(engagement)
+                except:
+                    engagement = {}
+
+            scored_videos.append({
+                "video_id": video_id,
+                "score": min(score, 0.99),
+                "description": video.get("description"),
+                "transcript": video.get("transcript"),
+                "creator": video.get("creator"),
+                "web_url": video.get("web_url"),
+                "play_count": engagement.get("play_count"),
+                "like_count": engagement.get("like_count"),
+                "duration_ms": video.get("duration_ms"),
+            })
+
+    # Sort by score descending
+    scored_videos.sort(key=lambda x: x["score"], reverse=True)
+    return scored_videos[:limit]
+
+
 @router.post("/search", response_model=SearchResponse)
 async def semantic_search(request: Request, query: SearchQuery):
     """
@@ -62,6 +126,10 @@ async def semantic_search(request: Request, query: SearchQuery):
         limit=query.limit,
         filters=filters if filters else None,
     )
+
+    # Fallback to keyword search if Qdrant returns no results
+    if not results:
+        results = _fallback_search(query.query, query.limit)
 
     return SearchResponse(
         query=query.query,
