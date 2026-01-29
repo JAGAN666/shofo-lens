@@ -26,4 +26,6 @@ Thumbs.db
 # Local data
 *.db
 data/
+!backend/data/
+!backend/data/videos.json
 models/
